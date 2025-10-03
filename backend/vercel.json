@@ -1,7 +1,14 @@
 {
-  "rewrites": [
-    { "source": "/health", "destination": "/api/health" },
-    { "source": "/docs", "destination": "/api/docs" },
-    { "source": "/openapi.json", "destination": "/api/openapi.json" }
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
+    }
   ]
 }
