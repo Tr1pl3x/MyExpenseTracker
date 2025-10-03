@@ -28,7 +28,7 @@ security = HTTPBearer()
 # Default categories
 DEFAULT_CATEGORIES = [
     "Food", "Transport", "Entertainment", "Shopping", 
-    "Bills", "Healthcare", "Education", "Others"
+    "Utilities", "Healthcare", "Education", "Peronal", "Others"
 ]
 
 # Dependency to get current user
@@ -220,6 +220,7 @@ def get_stats_by_category(
 def root():
     return {
         "message": "Expense Tracker API",
+        "message2": "SERVER IS RUNNING",
         "available_categories": DEFAULT_CATEGORIES
     }
 
