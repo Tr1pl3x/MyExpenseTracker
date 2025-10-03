@@ -1,4 +1,7 @@
 {
+  "functions": {
+    "api/**/*.py": { "runtime": "python3.11" }
+  },
   "rewrites": [
     { "source": "/health", "destination": "/api/health" },
     { "source": "/docs", "destination": "/api/docs" },
