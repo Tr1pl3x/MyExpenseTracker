@@ -1,4 +1,4 @@
-# api/main.py
+# backend/api/main.py
 from __future__ import annotations
 
 import os
@@ -11,7 +11,7 @@ from starlette.responses import JSONResponse
 
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
-from .limits import limiter  # single shared limiter instance
+from .limits import limiter  # shared limiter instance
 
 # Routers
 from .routers import auth as auth_router
@@ -23,10 +23,12 @@ from .routers import reports as reports_router
 app = FastAPI(title="Expense Tracker API")
 
 # ---- CORS ----
-origins = [o.strip() for o in os.getenv("FRONTEND_ORIGINS", "").split(",") if o.strip()]
+_default_origins = ["http://localhost:5173", "http://localhost:3000"]
+origins_env = os.getenv("FRONTEND_ORIGINS", "")
+origins = [o.strip() for o in origins_env.split(",") if o.strip()] or _default_origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins or ["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
@@ -35,12 +37,14 @@ app.add_middleware(
 # ---- Compression ----
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
-# ---- Trusted hosts (optional; recommended in prod) ----
-hosts = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
-if hosts:
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
+# ---- Trusted hosts (only if set)
+hosts_env = os.getenv("ALLOWED_HOSTS", "").strip()
+if hosts_env:
+    hosts = [h.strip() for h in hosts_env.split(",") if h.strip()]
+    if hosts:
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
 
-# ---- HTTPS redirect (enable only behind HTTPS) ----
+# ---- HTTPS redirect (behind HTTPS)
 if os.getenv("FORCE_HTTPS", "0") == "1":
     app.add_middleware(HTTPSRedirectMiddleware)
 
@@ -58,7 +62,7 @@ async def security_headers(request: Request, call_next):
         )
     return resp
 
-# ---- Rate limiting (global + per-route in routers) ----
+# ---- Rate limiting (global + per-route in routers)
 app.state.limiter = limiter
 app.add_exception_handler(
     RateLimitExceeded,
