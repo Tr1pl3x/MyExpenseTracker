@@ -1,2 +1,3 @@
 # backend/api/index.py
-from .main import app  # exposes FastAPI app for Vercel
+# Vercel picks this up because it's under the /api folder and exports `app`.
+from .main import app
