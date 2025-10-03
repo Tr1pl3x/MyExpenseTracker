@@ -1,8 +1,0 @@
-# backend/api/ping.py
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/")
-def ping():
-    return {"ok": True, "func": "api/ping"}
