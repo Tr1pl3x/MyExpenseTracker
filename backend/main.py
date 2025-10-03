@@ -28,7 +28,7 @@ security = HTTPBearer()
 # Default categories
 DEFAULT_CATEGORIES = [
     "Food", "Transport", "Entertainment", "Shopping", 
-    "Utilities", "Healthcare", "Education", "Peronal", "Others"
+    "Utilities", "Healthcare", "Education", "Personal", "Others"
 ]
 
 # Dependency to get current user
