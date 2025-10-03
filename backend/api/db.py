@@ -6,6 +6,8 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
+# remove/disable: SQLModel.metadata.create_all(engine)
 def init_db():
-    from . import models  # ensure models are imported
-    SQLModel.metadata.create_all(engine)
+    pass  # migrations own the schema now
+
+

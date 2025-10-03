@@ -144,6 +144,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
 .dmypy.json
 dmypy.json
 
@@ -172,5 +173,29 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
+
+# env & secrets
+.env
+*.env
+
+# python junk
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+
+# tests
+tests/*.db
+.pytest_cache/
+
+# environments
+.venv/
+.envrc
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
 
 # End of https://www.toptal.com/developers/gitignore/api/python
