@@ -1,3 +1,2 @@
-# index.py (root)
-# Vercel looks for an ASGI app named `app` here.
-from api.main import app  # reuse your existing FastAPI app
+# backend/api/index.py
+from .main import app  # exposes FastAPI app for Vercel
