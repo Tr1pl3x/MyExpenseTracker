@@ -1,4 +1,5 @@
-# 💰 Expense Tracker API 
+# 💰 Expense Tracker API - Complete Documentation
+
 A serverless FastAPI backend for tracking personal expenses with user authentication and analytics, deployable on Vercel with Neon PostgreSQL database.
 
 ## 📋 Table of Contents
@@ -8,6 +9,7 @@ A serverless FastAPI backend for tracking personal expenses with user authentica
 - [Project Structure](#project-structure)
 - [Setup & Installation](#setup--installation)
 - [API Routes Documentation](#api-routes-documentation)
+  - [Root Endpoint](#root-endpoint)
   - [Authentication Routes](#authentication-routes)
   - [Expense Routes](#expense-routes)
   - [Statistics Routes](#statistics-routes)
@@ -121,6 +123,73 @@ Interactive docs at: `http://localhost:8000/docs`
 ## 📚 API Routes Documentation
 
 Base URL (local): `http://localhost:8000`
+
+---
+
+## 🏠 Root Endpoint
+
+### Get API Information
+
+**Endpoint:** `GET /`
+
+**Description:** Get basic API information and available expense categories.
+
+**Authentication Required:** ❌ No
+
+**Request Headers:** None
+
+**Query Parameters:** None
+
+**Request Body:** None
+
+**Success Response (200):**
+```json
+{
+  "message": "Expense Tracker API",
+  "available_categories": [
+    "Food",
+    "Transport",
+    "Entertainment",
+    "Shopping",
+    "Bills",
+    "Healthcare",
+    "Education",
+    "Others"
+  ]
+}
+```
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| message | string | API name/welcome message |
+| available_categories | array | List of all valid expense categories |
+
+**Use Case:** 
+- Check if API is running
+- Get list of valid categories for dropdowns/selects
+- Health check endpoint
+
+**cURL Example:**
+```bash
+curl -X GET "http://localhost:8000/"
+```
+
+**JavaScript Example:**
+```javascript
+fetch('http://localhost:8000/')
+  .then(response => response.json())
+  .then(data => {
+    console.log('API:', data.message);
+    console.log('Categories:', data.available_categories);
+  });
+```
+
+**Note:** This is a public endpoint that doesn't require authentication. It's useful for:
+- Verifying the API is online
+- Fetching the list of valid categories for your frontend
+- API health monitoring
 
 ---
 
@@ -814,6 +883,7 @@ See cURL examples in each route section above.
 
 ### Testing Checklist
 
+- ✅ Check API is running (GET /)
 - ✅ Register new user
 - ✅ Login and receive token
 - ✅ Create expenses with different categories
@@ -957,6 +1027,21 @@ MIT License - Feel free to use in your projects!
 ---
 
 ## 🎯 Quick Reference
+
+### All API Endpoints
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/` | ❌ | Get API info & categories |
+| POST | `/auth/register` | ❌ | Register new user |
+| POST | `/auth/login` | ❌ | Login & get token |
+| POST | `/auth/logout` | ✅ | Logout |
+| POST | `/expense/create_expense` | ✅ | Create expense |
+| DELETE | `/expense/delete_expense/{id}` | ✅ | Delete expense |
+| GET | `/expense/list_expense` | ✅ | List all expenses |
+| GET | `/expense/list_expense_by_category` | ✅ | List by category |
+| GET | `/stats/total` | ✅ | Get total stats |
+| GET | `/stats/total_by_category` | ✅ | Get stats by category |
 
 ### Available Categories
 `Food` | `Transport` | `Entertainment` | `Shopping` | `Bills` | `Healthcare` | `Education` | `Others`
