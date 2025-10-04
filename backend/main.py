@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import List, Optional
@@ -16,19 +17,42 @@ from authentication import (
     get_password_hash, verify_password, create_access_token,
     decode_access_token
 )
-from dotenv import load_dotenv
-import os
-load_dotenv()
+
 # Create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Expense Tracker API")
 security = HTTPBearer()
 
+# CORS Configuration
+# Add your frontend URLs here
+origins = [
+    "http://localhost:3000",      # React default
+    "http://localhost:5173",      # Vite default
+    "http://localhost:5174",      # Vite alternative
+    "http://localhost:8080",      # Vue default
+    "http://localhost:4200",      # Angular default
+    "http://127.0.0.1:3000",      # Alternative localhost
+    "http://127.0.0.1:5173",      # Alternative localhost
+]
+
+# Add production URL when deploying
+production_url = os.getenv("FRONTEND_URL")
+if production_url:
+    origins.append(production_url)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,           # List of allowed origins
+    allow_credentials=True,          # Allow cookies
+    allow_methods=["*"],             # Allow all HTTP methods
+    allow_headers=["*"],             # Allow all headers
+)
+
 # Default categories
 DEFAULT_CATEGORIES = [
     "Food", "Transport", "Entertainment", "Shopping", 
-    "Utilities", "Healthcare", "Education", "Peronal", "Others"
+    "Bills", "Healthcare", "Education", "Others"
 ]
 
 # Dependency to get current user
@@ -149,7 +173,7 @@ def list_expense(
 ):
     expenses = db.query(Expense).filter(
         Expense.user_id == current_user.id
-    ).order_by(Expense.date.desc()).all()  # ✅ Already descending order!
+    ).order_by(Expense.date.desc()).all()
     
     return {"expenses": expenses, "count": len(expenses)}
 
@@ -168,7 +192,7 @@ def list_expense_by_category(
     expenses = db.query(Expense).filter(
         Expense.user_id == current_user.id,
         Expense.category == category
-    ).order_by(Expense.date.desc()).all()  # ✅ Already descending order!
+    ).order_by(Expense.date.desc()).all()
     
     return {"expenses": expenses, "count": len(expenses)}
 
@@ -220,7 +244,6 @@ def get_stats_by_category(
 def root():
     return {
         "message": "Expense Tracker API",
-        "message2": "SERVER IS RUNNING",
         "available_categories": DEFAULT_CATEGORIES
     }
 
