@@ -34,9 +34,10 @@ origins = [
     "http://localhost:4200",      # Angular default
     "http://127.0.0.1:3000",      # Alternative localhost
     "http://127.0.0.1:5173",      # Alternative localhost
+    "https://my-expense-tracker-iojs.vercel.app",  # Production frontend
 ]
 
-# Add production URL when deploying
+# Add additional production URL when deploying (optional)
 production_url = os.getenv("FRONTEND_URL")
 if production_url:
     origins.append(production_url)
@@ -52,7 +53,7 @@ app.add_middleware(
 # Default categories
 DEFAULT_CATEGORIES = [
     "Food", "Transport", "Entertainment", "Shopping", 
-    "Utilities", "Healthcare", "Education", "Personal", "Others"
+    "Bills", "Healthcare", "Education", "Others"
 ]
 
 # Dependency to get current user
@@ -136,7 +137,8 @@ def create_expense(
         amount=expense_data.amount,
         category=expense_data.category,
         description=expense_data.description,
-        date=datetime.utcnow()
+        date=datetime.utcnow()  # UTC time (recommended for global apps)
+        # date=datetime.now()   # Use this for local server time (not recommended)
     )
     db.add(new_expense)
     db.commit()
