@@ -5,19 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { CATEGORIES, CATEGORY_COLORS, CATEGORY_EMOJI } from '../../utils/constants';
 
-const ExpenseList = ({ expenses, onDelete, onFilterCategory }) => {
-  const [selectedCategory, setSelectedCategory] = useState('All');
+const ExpenseList = ({ expenses, onDelete, onFilterCategory, selectedCategory = 'All' }) => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [timezone, setTimezone] = useState('Sydney');
   const navigate = useNavigate();
 
   const handleCategoryFilter = (category) => {
-    setSelectedCategory(category);
-    if (category === 'All') {
-      onFilterCategory(null);
-    } else {
-      onFilterCategory(category);
-    }
+    onFilterCategory(category);
   };
 
   const handleDelete = async (id) => {
@@ -31,7 +25,6 @@ const ExpenseList = ({ expenses, onDelete, onFilterCategory }) => {
 
   const formatDateWithTimezone = (dateString) => {
     try {
-      // Backend returns UTC time without 'Z', so we need to append it
       const utcDateString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
       const date = new Date(utcDateString);
       
@@ -40,7 +33,6 @@ const ExpenseList = ({ expenses, onDelete, onFilterCategory }) => {
         'NZ': 'Pacific/Auckland'
       };
       
-      // Format in selected timezone
       const formattedDate = new Intl.DateTimeFormat('en-AU', {
         timeZone: timezoneMap[timezone],
         day: 'numeric',
@@ -59,7 +51,6 @@ const ExpenseList = ({ expenses, onDelete, onFilterCategory }) => {
 
   const getRelativeTime = (dateString) => {
     try {
-      // Backend returns UTC time without 'Z', so we need to append it
       const utcDateString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
       const date = new Date(utcDateString);
       return formatDistanceToNow(date, { addSuffix: true });
