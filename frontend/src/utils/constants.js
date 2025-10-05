@@ -3,11 +3,12 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const CATEGORIES = [
-'Food','Transport','Entertainment','Shopping','Utilities','Healthcare','Education','Personal','Others'
+'Food','Groceries','Transport','Entertainment','Shopping','Utilities','Healthcare','Education','Personal','Others'
 ];
 
 export const CATEGORY_COLORS = {
   Food: '#FF6B6B',
+  Groceries: '#159c27ff',
   Transport: '#4ECDC4',
   Entertainment: '#FFE66D',
   Shopping: '#95E1D3',
@@ -20,6 +21,7 @@ export const CATEGORY_COLORS = {
 
 export const CATEGORY_EMOJI = {
   Food: '🍔',
+  Groceries: '🥕',
   Transport: '🚗',
   Entertainment: '🎬',
   Shopping: '🛍️',

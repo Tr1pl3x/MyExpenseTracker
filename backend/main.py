@@ -52,8 +52,16 @@ app.add_middleware(
 
 # Default categories
 DEFAULT_CATEGORIES = [
-    "Food", "Transport", "Entertainment", "Shopping", 
-    "Utilities", "Healthcare", "Education", "Others"
+    "Food",
+    "Groceries",
+    "Transport", 
+    "Entertainment", 
+    "Shopping", 
+    "Utilities", 
+    "Healthcare", 
+    "Education",
+    "Personal",
+    "Others"
 ]
 
 # Dependency to get current user

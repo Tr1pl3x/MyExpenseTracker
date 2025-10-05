@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import Header from '../Layout/Header';
-import Stats from './Stats';
 import ExpenseForm from './ExpenseForm';
-import ExpenseList from './ExpenseList';
+import RecentExpenses from './RecentExpenses';
 import { useExpenses } from '../../hooks/useExpense.jsx';
 import { CATEGORY_EMOJI } from '../../utils/constants';
 
@@ -19,7 +18,6 @@ const Dashboard = () => {
     error,
     addExpense,
     removeExpense,
-    filterByCategory,
     refetch,
   } = useExpenses();
 
@@ -30,14 +28,6 @@ const Dashboard = () => {
 
   const handleDeleteExpense = async (id) => {
     await removeExpense(id);
-  };
-
-  const handleFilterCategory = (category) => {
-    if (category) {
-      filterByCategory(category);
-    } else {
-      refetch();
-    }
   };
 
   if (loading) {
@@ -100,11 +90,10 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Expense History */}
-        <ExpenseList
+        {/* Recent Transactions */}
+        <RecentExpenses
           expenses={expenses}
           onDelete={handleDeleteExpense}
-          onFilterCategory={handleFilterCategory}
         />
 
         {showModal && (
