@@ -7,6 +7,7 @@ import { DarkModeProvider } from './hooks/useDarkMode.jsx';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
+import AllExpenses from './components/Expenses/AllExpenses';
 import Report from './components/Report/Report';
 import ProtectedRoute from './components/Layout/ProtectedRoute';
 import './App.css';
@@ -26,6 +27,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/expenses"
+                element={
+                  <ProtectedRoute>
+                    <AllExpenses />
                   </ProtectedRoute>
                 }
               />
