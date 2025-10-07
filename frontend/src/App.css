@@ -1440,6 +1440,15 @@
   gap: 1.5rem;
 }
 
+/* Chart Container */
+.chart-container {
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+}
+
 .category-breakdown-item {
   padding: 1.25rem;
   background: var(--bg-secondary);
