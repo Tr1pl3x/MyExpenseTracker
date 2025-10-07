@@ -1,13 +1,21 @@
 // src/components/Dashboard/RecentExpenses.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { CATEGORY_COLORS, CATEGORY_EMOJI } from '../../utils/constants';
 
 const RecentExpenses = ({ expenses, onDelete }) => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [timezone, setTimezone] = useState(() => {
+    const saved = localStorage.getItem('timezone');
+    return saved || 'Sydney';
+  });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem('timezone', timezone);
+  }, [timezone]);
 
   // Show only latest 5
   const recentExpenses = expenses.slice(0, 5);
@@ -35,7 +43,14 @@ const RecentExpenses = ({ expenses, onDelete }) => {
     try {
       const utcDateString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
       const date = new Date(utcDateString);
+      
+      const timezoneMap = {
+        'Sydney': 'Australia/Sydney',
+        'NZ': 'Pacific/Auckland'
+      };
+      
       return new Intl.DateTimeFormat('en-AU', {
+        timeZone: timezoneMap[timezone],
         day: 'numeric',
         month: 'short',
         year: 'numeric',
@@ -128,16 +143,14 @@ const RecentExpenses = ({ expenses, onDelete }) => {
             ))}
           </div>
 
-          {expenses.length > 5 && (
-            <div className="see-more-container">
-              <button 
-                className="btn btn-primary btn-see-more"
-                onClick={() => navigate('/expenses')}
-              >
-                See All Expenses
-              </button>
-            </div>
-          )}
+          <div className="see-more-container">
+            <button 
+              className="btn btn-primary btn-see-more"
+              onClick={() => navigate('/expenses')}
+            >
+              See All Expenses
+            </button>
+          </div>
         </>
       )}
     </div>

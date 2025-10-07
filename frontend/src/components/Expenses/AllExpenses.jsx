@@ -1,6 +1,6 @@
 // src/components/Expenses/AllExpenses.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import Header from '../Layout/Header';
@@ -10,11 +10,19 @@ import { CATEGORIES, CATEGORY_COLORS, CATEGORY_EMOJI } from '../../utils/constan
 const AllExpenses = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [timezone, setTimezone] = useState('Sydney');
+  const [timezone, setTimezone] = useState(() => {
+    const saved = localStorage.getItem('timezone');
+    return saved || 'Sydney';
+  });
   const [currentPage, setCurrentPage] = useState(1);
+  const [timeFilter, setTimeFilter] = useState('all');
   const navigate = useNavigate();
 
   const ITEMS_PER_PAGE = 8;
+
+  useEffect(() => {
+    localStorage.setItem('timezone', timezone);
+  }, [timezone]);
 
   const {
     expenses,
@@ -34,6 +42,47 @@ const AllExpenses = () => {
       filterByCategory(category);
     }
   };
+
+  const handleTimeFilter = (filter) => {
+    setTimeFilter(filter);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  // Filter expenses by time
+  const filterExpensesByTime = (expensesList) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (timeFilter) {
+      case 'today':
+        return expensesList.filter(exp => {
+          const expDate = new Date(exp.date.endsWith('Z') ? exp.date : exp.date + 'Z');
+          const expDay = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate());
+          return expDay.getTime() === today.getTime();
+        });
+      
+      case 'week':
+        const weekAgo = new Date(today);
+        weekAgo.setDate(today.getDate() - 7);
+        return expensesList.filter(exp => {
+          const expDate = new Date(exp.date.endsWith('Z') ? exp.date : exp.date + 'Z');
+          return expDate >= weekAgo;
+        });
+      
+      case 'month':
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        return expensesList.filter(exp => {
+          const expDate = new Date(exp.date.endsWith('Z') ? exp.date : exp.date + 'Z');
+          return expDate >= monthStart;
+        });
+      
+      case 'all':
+      default:
+        return expensesList;
+    }
+  };
+
+  const filteredByTimeExpenses = filterExpensesByTime(expenses);
 
   const handleDelete = async (id) => {
     try {
@@ -81,10 +130,10 @@ const AllExpenses = () => {
   };
 
   // Pagination calculations
-  const totalPages = Math.ceil(expenses.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredByTimeExpenses.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedExpenses = expenses.slice(startIndex, endIndex);
+  const paginatedExpenses = filteredByTimeExpenses.slice(startIndex, endIndex);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -143,6 +192,16 @@ const AllExpenses = () => {
               </button>
               <select 
                 className="timezone-select"
+                value={timeFilter}
+                onChange={(e) => handleTimeFilter(e.target.value)}
+              >
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+              <select 
+                className="timezone-select"
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
               >
@@ -170,13 +229,15 @@ const AllExpenses = () => {
             ))}
           </div>
 
-          {expenses.length === 0 ? (
+          {filteredByTimeExpenses.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">📊</div>
               <p>No expenses found</p>
               <p className="empty-subtitle">
                 {selectedCategory !== 'All' 
-                  ? `No expenses in ${selectedCategory} category`
+                  ? `No expenses in ${selectedCategory} category for this time period`
+                  : timeFilter !== 'all'
+                  ? 'No expenses for this time period'
                   : 'Add your first expense to get started!'}
               </p>
             </div>
@@ -234,7 +295,7 @@ const AllExpenses = () => {
           )}
 
           {/* Pagination */}
-          {expenses.length > 0 && totalPages > 1 && (
+          {filteredByTimeExpenses.length > 0 && totalPages > 1 && (
             <div className="pagination">
               <button
                 className="pagination-btn"
