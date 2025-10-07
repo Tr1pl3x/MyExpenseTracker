@@ -11,7 +11,10 @@ const Report = () => {
   const [filteredExpenses, setFilteredExpenses] = useState([]);
   const [timeFilter, setTimeFilter] = useState('month');
   const [loading, setLoading] = useState(true);
+  const [categoryPage, setCategoryPage] = useState(1);
   const navigate = useNavigate();
+
+  const CATEGORIES_PER_PAGE = 3;
 
   useEffect(() => {
     fetchReportData();
@@ -19,6 +22,7 @@ const Report = () => {
 
   useEffect(() => {
     filterExpensesByTime();
+    setCategoryPage(1); // Reset category pagination when time filter changes
   }, [timeFilter, allExpenses]);
 
   const fetchReportData = async () => {
@@ -131,15 +135,9 @@ const Report = () => {
       .slice(0, 3);
   };
 
-  const getLargestExpense = () => {
-    if (filteredExpenses.length === 0) return 0;
-    return Math.max(...filteredExpenses.map(exp => exp.amount));
-  };
-
   const getDailyAverage = () => {
     if (filteredExpenses.length === 0) return 0;
     
-    // Get date range
     const dates = filteredExpenses.map(exp => new Date(exp.date).toDateString());
     const uniqueDays = new Set(dates).size;
     
@@ -149,14 +147,12 @@ const Report = () => {
 
   const getTodayTotalSpent = () => {
     const now = new Date();
-    // Get today's date in UTC
-    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     
     const todayExpenses = allExpenses.filter(exp => {
-      const expDate = new Date(exp.date);
-      // Get expense date in UTC
-      const expUTC = Date.UTC(expDate.getUTCFullYear(), expDate.getUTCMonth(), expDate.getUTCDate());
-      return expUTC === todayUTC;
+      const expDate = new Date(exp.date.endsWith('Z') ? exp.date : exp.date + 'Z');
+      return expDate >= todayStart && expDate < todayEnd;
     });
     
     return todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
@@ -164,14 +160,12 @@ const Report = () => {
 
   const getTodayAverage = () => {
     const now = new Date();
-    // Get today's date in UTC
-    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     
     const todayExpenses = allExpenses.filter(exp => {
-      const expDate = new Date(exp.date);
-      // Get expense date in UTC
-      const expUTC = Date.UTC(expDate.getUTCFullYear(), expDate.getUTCMonth(), expDate.getUTCDate());
-      return expUTC === todayUTC;
+      const expDate = new Date(exp.date.endsWith('Z') ? exp.date : exp.date + 'Z');
+      return expDate >= todayStart && expDate < todayEnd;
     });
     
     if (todayExpenses.length === 0) return 0;
@@ -179,14 +173,14 @@ const Report = () => {
     return todayTotal / todayExpenses.length;
   };
 
-  const getAverageExpense = (stats) => {
-    if (stats.total_expenses === 0) return 0;
-    return stats.total_amount / stats.total_expenses;
-  };
-
   const getCategoryPercentage = (categoryAmount, totalAmount) => {
     if (totalAmount === 0) return 0;
     return ((categoryAmount / totalAmount) * 100).toFixed(1);
+  };
+
+  const handleCategoryPageChange = (page) => {
+    setCategoryPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -229,6 +223,12 @@ const Report = () => {
   const dailyAverage = getDailyAverage();
   const todayTotalSpent = getTodayTotalSpent();
   const todayAverage = getTodayAverage();
+
+  // Category pagination
+  const totalCategoryPages = Math.ceil(categoryStats.length / CATEGORIES_PER_PAGE);
+  const categoryStartIndex = (categoryPage - 1) * CATEGORIES_PER_PAGE;
+  const categoryEndIndex = categoryStartIndex + CATEGORIES_PER_PAGE;
+  const paginatedCategories = categoryStats.slice(categoryStartIndex, categoryEndIndex);
 
   if (filteredExpenses.length === 0) {
     return (
@@ -313,7 +313,7 @@ const Report = () => {
           <div className="report-section">
             <h2 className="report-section-title">Spending by Category</h2>
             <div className="category-breakdown">
-              {categoryStats.map((cat) => (
+              {paginatedCategories.map((cat) => (
                 <div key={cat.category} className="category-breakdown-item">
                   <div className="category-breakdown-header">
                     <div className="category-breakdown-info">
@@ -343,6 +343,39 @@ const Report = () => {
                 </div>
               ))}
             </div>
+
+            {/* Category Pagination */}
+            {categoryStats.length > CATEGORIES_PER_PAGE && (
+              <div className="pagination">
+                <button
+                  className="pagination-btn"
+                  onClick={() => handleCategoryPageChange(categoryPage - 1)}
+                  disabled={categoryPage === 1}
+                >
+                  ← Previous
+                </button>
+
+                <div className="pagination-numbers">
+                  {Array.from({ length: totalCategoryPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      className={`pagination-number ${categoryPage === page ? 'active' : ''}`}
+                      onClick={() => handleCategoryPageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  className="pagination-btn"
+                  onClick={() => handleCategoryPageChange(categoryPage + 1)}
+                  disabled={categoryPage === totalCategoryPages}
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Insights */}
