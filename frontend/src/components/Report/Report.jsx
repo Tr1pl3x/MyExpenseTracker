@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Header from '../Layout/Header';
 import { api } from '../../services/api';
-import { CATEGORY_EMOJI } from '../../utils/constants';
+import { CATEGORIES, CATEGORY_EMOJI } from '../../utils/constants';
 
 const Report = () => {
   const [allExpenses, setAllExpenses] = useState([]);
@@ -15,6 +16,19 @@ const Report = () => {
   const navigate = useNavigate();
 
   const CATEGORIES_PER_PAGE = 3;
+
+  // Colors for charts
+  const CHART_COLORS = [
+    '#6366f1', // Primary purple
+    '#8b5cf6', // Light purple
+    '#ec4899', // Pink
+    '#f59e0b', // Orange
+    '#10b981', // Green
+    '#3b82f6', // Blue
+    '#ef4444', // Red
+    '#8b5cf6', // Purple
+    '#6366f1', // Indigo
+  ];
 
   useEffect(() => {
     fetchReportData();
@@ -309,9 +323,80 @@ const Report = () => {
             </div>
           </div>
 
+          {/* Charts Section */}
+          {categoryStats.length > 0 && (
+            <>
+              {/* Bar Chart - Category Comparison */}
+              <div className="report-section">
+                <h2 className="report-section-title">Category Comparison</h2>
+                <div className="chart-container">
+                  <ResponsiveContainer width="100%" height={350}>
+                    <BarChart data={categoryStats}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                      <XAxis 
+                        dataKey="category" 
+                        stroke="var(--text-secondary)"
+                        tick={{ fill: 'var(--text-secondary)' }}
+                        tickFormatter={(value) => `${CATEGORY_EMOJI[value]} ${value}`}
+                      />
+                      <YAxis 
+                        stroke="var(--text-secondary)"
+                        tick={{ fill: 'var(--text-secondary)' }}
+                        tickFormatter={(value) => `${value}`}
+                      />
+                      <Tooltip 
+                        formatter={(value) => `${value.toFixed(2)}`}
+                        contentStyle={{ 
+                          backgroundColor: 'var(--bg-secondary)', 
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar dataKey="total_amount" fill="#6366f1" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              {/* Pie Chart - Category Distribution */}
+              <div className="report-section">
+                <h2 className="report-section-title">Spending Distribution</h2>
+                <div className="chart-container">
+                  <ResponsiveContainer width="100%" height={350}>
+                    <PieChart>
+                      <Pie
+                        data={categoryStats}
+                        dataKey="total_amount"
+                        nameKey="category"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={120}
+                        label={({ category, percent }) => `${CATEGORY_EMOJI[category]} ${category}: ${(percent * 100).toFixed(1)}%`}
+                        labelLine={true}
+                      >
+                        {categoryStats.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value) => `${value.toFixed(2)}`}
+                        contentStyle={{ 
+                          backgroundColor: 'var(--bg-secondary)', 
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '8px'
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+
+            </>
+          )}
+
           {/* Category Breakdown */}
           <div className="report-section">
-            <h2 className="report-section-title">Spending by Category</h2>
+            <h2 className="report-section-title">Detailed Category Breakdown</h2>
             <div className="category-breakdown">
               {paginatedCategories.map((cat) => (
                 <div key={cat.category} className="category-breakdown-item">
